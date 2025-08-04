@@ -1,5 +1,8 @@
 from datetime import datetime
 from typing import Dict, Any, Optional, List
+
+from firebase_admin import firestore
+
 from .firebase_config import db
 
 

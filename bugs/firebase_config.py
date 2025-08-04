@@ -12,3 +12,4 @@ if not firebase_admin._apps:
 
 # Get Firestore client
 db = firestore.client()
+

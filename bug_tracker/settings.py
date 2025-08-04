@@ -105,3 +105,7 @@ CORS_ALLOWED_ORIGINS = [
 # Firebase settings
 FIREBASE_CREDENTIALS_PATH = config('FIREBASE_CREDENTIALS_PATH')
 FIREBASE_PROJECT_ID = config('FIREBASE_PROJECT_ID')
+
+# Path to your service account key
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CREDENTIALS_PATH = os.path.join(BASE_DIR, "django-bug-tracker-api-firebase-adminsdk-fbsvc-8357ae789f.json")
