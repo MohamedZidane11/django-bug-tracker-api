@@ -12,7 +12,8 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '.onrender.com',  # Allow all Render subdomains
+    '.railway.app',  # Allow all Railway domains
+    '.up.railway.app',  # Railway's new domain
 ]
 
 INSTALLED_APPS = [
@@ -23,8 +24,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'bugs',
     'corsheaders',
+    'bugs',
 ]
 
 MIDDLEWARE = [
@@ -60,13 +61,23 @@ TEMPLATES = [
 WSGI_APPLICATION = 'bug_tracker.wsgi.application'
 
 # Since we're using Firestore, we'll use a simple SQLite for Django's internal tables
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# Database - Use Railway PostgreSQL if available, fallback to SQLite
+DATABASE_URL = config('DATABASE_URL', default='')
 
+if DATABASE_URL:
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL)
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
+# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -91,6 +102,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 # REST Framework settings
 REST_FRAMEWORK = {
@@ -108,8 +122,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Keep for local development
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://localhost:8080",
-    "http://127.0.0.1:8080",
 ]
 
 # Firebase settings - handle both JSON string and file path
@@ -131,3 +143,28 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_BROWSER_XSS_FILTER = True
     X_FRAME_OPTIONS = 'DENY'
+
+    # Trust Railway's proxy
+    USE_TZ = True
+    SECURE_REFERRER_POLICY = 'same-origin'
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': config('DJANGO_LOG_LEVEL', default='INFO'),
+            'propagate': False,
+        },
+    },
+}
