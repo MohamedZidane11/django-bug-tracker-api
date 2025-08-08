@@ -4,8 +4,11 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import BugReport
 from .serializers import BugReportSerializer, BugStatsSerializer
+from django.http import JsonResponse
 
 
+def health_check(request):
+    return JsonResponse({"status": "ok", "message": "Bug tracker API is running"})
 
 @api_view(['GET', 'POST'])
 def bug_list(request):
